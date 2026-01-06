@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mesajlar - SawyerS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body { background-color: #f0f2f5; font-family: 'Segoe UI', sans-serif; height: 100vh; display: flex; flex-direction: column; }
+        
+        .chat-container { flex-grow: 1; display: flex; max-width: 1200px; margin: 20px auto; width: 95%; background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 5px 20px rgba(0,0,0,0.1); height: 85vh; }
+        
+        /* SOL LİSTE */
+        .chat-sidebar { width: 350px; border-right: 1px solid #ddd; display: flex; flex-direction: column; background: #fff; }
+        .sidebar-header { padding: 20px; background: #2962ff; color: white; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+        .sidebar-header a { color: white; text-decoration: none; font-size: 14px; }
+        .contact-list { overflow-y: auto; flex-grow: 1; }
+        .contact-item { padding: 15px; border-bottom: 1px solid #f1f1f1; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 15px; }
+        .contact-item:hover { background-color: #f9f9f9; }
+        .contact-item.active { background-color: #e3f2fd; border-left: 4px solid #2962ff; }
+        .avatar { width: 45px; height: 45px; background: #ddd; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #555; font-size: 18px; }
+
+        /* SAĞ SOHBET */
+        .chat-area { flex-grow: 1; display: flex; flex-direction: column; background-color: #e5ddd5; position: relative; }
+        
+        /* HEADER ve ÜRÜN BİLGİ KARTI */
+        .chat-header-wrapper { background: white; border-bottom: 1px solid #ddd; }
+        .chat-header { padding: 15px; display: flex; align-items: center; gap: 15px; }
+        
+        /* YENİ EKLENEN: Ürün Bilgi Alanı */
+        .product-info-bar {
+            display: none; /* Başlangıçta gizli */
+            background-color: #f8f9fa; padding: 10px 15px; border-top: 1px solid #eee;
+            align-items: center; gap: 15px; cursor: pointer; transition: 0.2s;
+        }
+        .product-info-bar:hover { background-color: #e9ecef; }
+        .product-thumb { width: 40px; height: 40px; border-radius: 5px; object-fit: cover; border: 1px solid #ddd; }
+        .product-details h6 { margin: 0; font-size: 14px; font-weight: 600; color: #333; }
+        .product-details span { font-size: 13px; color: #2962ff; font-weight: 700; }
+
+        .messages-box { flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); }
+        .message { max-width: 70%; padding: 10px 15px; border-radius: 10px; position: relative; font-size: 14px; word-wrap: break-word;}
+        .message.sent { align-self: flex-end; background-color: #dcf8c6; border-radius: 10px 0 10px 10px; }
+        .message.received { align-self: flex-start; background-color: white; border-radius: 0 10px 10px 10px; }
+        
+        .chat-input-area { padding: 15px; background: #f0f0f0; display: flex; gap: 10px; align-items: center; position: relative; }
+        .chat-input { flex-grow: 1; border: none; padding: 12px; border-radius: 25px; outline: none; }
+        .send-btn { background: #2962ff; color: white; border: none; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;}
+        
+        .attachment-wrapper { position: relative; }
+        .attach-btn { background: #e4e6eb; color: #444; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; transition: 0.2s; }
+        .attach-btn:hover { background: #d0d2d6; color: #000; }
+        .attach-btn.open i { transform: rotate(45deg); } 
+        .attach-menu { display: none; position: absolute; bottom: 55px; left: 0; background: white; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.15); width: 180px; overflow: hidden; z-index: 100; animation: popUp 0.2s; }
+        .menu-option { padding: 12px 15px; cursor: pointer; font-size: 14px; color: #444; display: flex; align-items: center; gap: 12px; transition: 0.2s; }
+        .menu-option:hover { background: #f5f5f5; color: #2962ff; }
+        @keyframes popUp { from{opacity:0; transform:translateY(10px) scale(0.95);} to{opacity:1; transform:translateY(0) scale(1);} }
+
+    </style>
+</head>
+<body>
+
+    <div class="chat-container">
+        <div class="chat-sidebar">
+            <div class="sidebar-header">
+                <span>💬 Mesajlarım</span>
+                <a href="index.html"><i class="fa-solid fa-house"></i> Ana Sayfa</a>
+            </div>
+            <div class="contact-list" id="contactList">
+                <div class="p-3 text-center text-muted">Yükleniyor...</div>
+            </div>
+        </div>
+
+        <div class="chat-area">
+            
+            <div class="chat-header-wrapper" id="topHeader" style="display: none;">
+                <div class="chat-header">
+                    <div class="avatar" id="headerAvatar">?</div>
+                    <div>
+                        <h5 id="headerName" style="margin:0; font-weight:700;">Kullanıcı</h5>
+                        <small style="color:green;">Çevrimiçi</small>
+                    </div>
+                </div>
+
+                <div class="product-info-bar" id="productInfoBar">
+                    <img src="" id="productImg" class="product-thumb">
+                    <div class="product-details">
+                        <h6 id="productTitle">Ürün Başlığı</h6>
+                        <span id="productPrice">0 TL</span>
+                    </div>
+                    <div style="margin-left: auto; color: #888; font-size: 12px;">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="messages-box" id="messagesBox">
+                <div style="display:flex; height:100%; align-items:center; justify-content:center; color:#888; flex-direction:column;">
+                    <i class="fa-regular fa-comments fa-3x mb-3"></i>
+                    <h4>Sohbet Seçin</h4>
+                    <p>Soldan bir kişi seçin veya ilandan mesaj atın.</p>
+                </div>
+            </div>
+
+            <div class="chat-input-area" id="inputArea" style="display: none;">
+                <div class="attachment-wrapper">
+                    <button class="attach-btn" id="attachBtn"><i class="fa-solid fa-plus"></i></button>
+                    <div class="attach-menu" id="attachMenu">
+                        <div class="menu-option" onclick="handleAttachment('image')"><i class="fa-regular fa-image" style="color: #4caf50;"></i> Resim Ekle</div>
+                        <div class="menu-option" onclick="handleAttachment('file')"><i class="fa-solid fa-paperclip" style="color: #2196f3;"></i> Dosya Ekle</div>
+                        <div class="menu-option" onclick="handleAttachment('link')"><i class="fa-solid fa-link" style="color: #ff9800;"></i> Link Ekle</div>
+                    </div>
+                </div>
+                <input type="text" class="chat-input" id="msgInput" placeholder="Mesaj yaz...">
+                <button class="send-btn" id="sendBtn"><i class="fa-solid fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const myId = localStorage.getItem('userId');
+        const myName = localStorage.getItem('userName');
+        let currentPartnerId = null;
+        let currentIlanId = null; // Aktif ilanın ID'si
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            if (!myId) { 
+                alert("Giriş yapmalısınız!"); 
+                window.location.href = "giris.html"; 
+                return; 
+            }
+
+            // Menü Mantığı
+            const attachBtn = document.getElementById('attachBtn');
+            const attachMenu = document.getElementById('attachMenu');
+            attachBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const isOpen = attachMenu.style.display === 'block';
+                attachMenu.style.display = isOpen ? 'none' : 'block';
+                attachBtn.classList.toggle('open', !isOpen);
+            });
+            document.addEventListener('click', () => {
+                if(attachMenu.style.display === 'block') {
+                    attachMenu.style.display = 'none';
+                    attachBtn.classList.remove('open');
+                }
+            });
+
+            await loadInbox();
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const ilanId = urlParams.get('ilanId');
+
+            if (ilanId) {
+                await startChatFromAd(ilanId);
+            }
+
+            document.getElementById('sendBtn').onclick = sendMessage;
+            document.getElementById('msgInput').addEventListener('keypress', (e) => { 
+                if(e.key === 'Enter') sendMessage(); 
+            });
+            
+            setInterval(() => { if(currentPartnerId) loadMessages(false); }, 3000);
+        });
+
+        // --- İLAN BİLGİSİ İLE SOHBET BAŞLATMA ---
+        async function startChatFromAd(ilanId) {
+            try {
+                const res = await fetch(`http://localhost:5000/api/ilanlar/${ilanId}`);
+                if (!res.ok) throw new Error("İlan bulunamadı");
+                const ilan = await res.json();
+                
+                const sellerId = ilan.sellerId;
+                const sellerName = ilan.sellerName || "Satıcı";
+                
+                if (!sellerId || sellerId === myId) return;
+
+                // Sohbeti Aç
+                openChat(sellerId, sellerName);
+
+                // --- ÜRÜN BİLGİ KARTINI DOLDUR ---
+                currentIlanId = ilan._id; // Mesaj atarken kullanacağız
+                const productBar = document.getElementById('productInfoBar');
+                const productImg = document.getElementById('productImg');
+                const productTitle = document.getElementById('productTitle');
+                const productPrice = document.getElementById('productPrice');
+
+                // Görseli ayarla
+                if(ilan.images && ilan.images.length > 0) {
+                    productImg.src = `http://localhost:5000/uploads/${ilan.images[0]}`;
+                } else {
+                    productImg.src = 'https://placehold.co/50?text=No+Img';
+                }
+
+                productTitle.innerText = ilan.title;
+                productPrice.innerText = Number(ilan.price).toLocaleString('tr-TR') + ' TL';
+                
+                // Kartı Görünür Yap (Flex)
+                productBar.style.display = 'flex';
+                
+                // Karta tıklayınca ilana git
+                productBar.onclick = () => window.open(`ilan-detay.html?id=${ilan._id}`, '_blank');
+
+            } catch(e) { console.error(e); }
+        }
+
+        async function loadInbox() {
+            const list = document.getElementById('contactList');
+            try {
+                const res = await fetch(`http://localhost:5000/api/messages/inbox/${myId}`);
+                const contacts = await res.json();
+                list.innerHTML = '';
+                if (contacts.length === 0) { list.innerHTML = '<div class="p-3 text-center text-muted small">Henüz mesajınız yok.</div>'; return; }
+                contacts.forEach(c => {
+                    const active = (c.id === currentPartnerId) ? 'active' : '';
+                    list.innerHTML += `
+                        <div class="contact-item ${active}" onclick="openChat('${c.id}', '${c.name}')">
+                            <div class="avatar">${c.name.charAt(0).toUpperCase()}</div>
+                            <div style="overflow:hidden;">
+                                <h6 style="margin:0; font-size:15px;">${c.name}</h6>
+                                <small style="color:#888; font-size:12px; white-space:nowrap;">${c.lastMsg ? c.lastMsg.substring(0, 25) : '...'}</small>
+                            </div>
+                        </div>`;
+                });
+            } catch(e) { console.error(e); }
+        }
+
+        function openChat(partnerId, partnerName) {
+            currentPartnerId = partnerId;
+            
+            // Eğer soldaki listeden tıkladıysak ürün bilgisini gizle (Karışmasın diye)
+            // Sadece ilan detaydan gelindiğinde (startChatFromAd içinde) açılır.
+            const urlParams = new URLSearchParams(window.location.search);
+            if(!urlParams.get('ilanId')) {
+                document.getElementById('productInfoBar').style.display = 'none';
+                currentIlanId = null;
+            }
+
+            const headerWrapper = document.getElementById('topHeader');
+            const inputArea = document.getElementById('inputArea');
+            const headerName = document.getElementById('headerName');
+            const headerAvatar = document.getElementById('headerAvatar');
+
+            if(headerWrapper) headerWrapper.style.display = 'block';
+            if(inputArea) inputArea.style.display = 'flex';
+            if(headerName) headerName.innerText = partnerName;
+            if(headerAvatar) headerAvatar.innerText = partnerName.charAt(0).toUpperCase();
+
+            loadMessages(true);
+        }
+
+        async function loadMessages(shouldScroll = false) {
+            if(!currentPartnerId) return;
+            const box = document.getElementById('messagesBox');
+            try {
+                const res = await fetch(`http://localhost:5000/api/messages/chat/${myId}/${currentPartnerId}`);
+                const msgs = await res.json();
+                if(msgs.length === 0) { 
+                    box.innerHTML = '<div class="text-center mt-5 text-muted">Sohbeti başlatın!</div>'; 
+                    return; 
+                }
+                box.innerHTML = ''; 
+                msgs.forEach(m => {
+                    const cls = (m.senderId === myId) ? 'sent' : 'received';
+                    box.innerHTML += `<div class="message ${cls}">${m.text}</div>`;
+                });
+                if (shouldScroll) box.scrollTop = box.scrollHeight;
+            } catch(e) { console.error(e); }
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('msgInput');
+            const txt = input.value.trim();
+            if(!txt || !currentPartnerId) return;
+
+            const box = document.getElementById('messagesBox');
+            if(box.querySelector('.text-center')) box.innerHTML = '';
+            box.innerHTML += `<div class="message sent" style="opacity:0.6;">${txt}</div>`;
+            box.scrollTop = box.scrollHeight;
+            input.value = '';
+
+            try {
+                await fetch('http://localhost:5000/api/messages/send', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ 
+                        senderId: myId, 
+                        senderName: myName, 
+                        receiverId: currentPartnerId, 
+                        text: txt,
+                        ilanId: currentIlanId // İlan ID'sini de kaydet (opsiyonel)
+                    })
+                });
+                loadMessages(); loadInbox();
+            } catch (err) { alert("Bağlantı hatası!"); }
+        }
+
+        function handleAttachment(type) {
+            if(type === 'image') alert("📷 Yakında!");
+            if(type === 'file') alert("📎 Yakında!");
+            if(type === 'link') {
+                const link = prompt("Link:");
+                if(link) document.getElementById('msgInput').value += " " + link;
+            }
+            document.getElementById('attachMenu').style.display = 'none';
+            document.getElementById('attachBtn').classList.remove('open');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hesabım - SawyerS 2.el</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body { background-color: #f4f7f6; font-family: 'Segoe UI', sans-serif; }
+        
+        /* HEADER */
+        .site-header { background: linear-gradient(90deg, #2962ff, #1a4bd6); padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; color: white; margin-bottom: 30px;}
+        .header-logo { font-size: 24px; font-weight: 800; color: white; text-decoration: none; }
+        .header-menu a { color: white; text-decoration: none; margin-left: 20px; font-weight: 600; cursor: pointer; }
+
+        .container { max-width: 1200px; }
+
+        /* KART STİLLERİ */
+        .profile-card { background: white; border-radius: 12px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); height: 100%; }
+        
+        /* --- YENİ AVATAR (RESİM) STİLLERİ --- */
+        .avatar-container {
+            position: relative; width: 120px; height: 120px; margin: 0 auto 20px auto; cursor: pointer;
+        }
+        .avatar-circle { 
+            width: 100%; height: 100%; 
+            background: #e3f2fd; color: #2962ff; 
+            font-size: 40px; border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; 
+            overflow: hidden; border: 4px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .avatar-circle img { width: 100%; height: 100%; object-fit: cover; }
+        
+        /* Kamera İkonu (Hover) */
+        .avatar-overlay {
+            position: absolute; bottom: 5px; right: 5px; 
+            background: #2962ff; color: white; 
+            width: 35px; height: 35px; border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; 
+            border: 2px solid white; font-size: 16px; transition: 0.2s;
+        }
+        .avatar-container:hover .avatar-overlay { transform: scale(1.1); }
+        /* ------------------------------------ */
+
+        .form-label { font-weight: 600; font-size: 14px; color: #555; }
+        .form-control { border-radius: 8px; padding: 10px; border: 1px solid #eee; background: #f9f9f9; }
+        .form-control:focus { border-color: #2962ff; background: white; box-shadow: none; }
+
+        /* İLAN KARTLARI (LİSTE) */
+        .my-ad-item { 
+            background: white; border-radius: 10px; padding: 15px; margin-bottom: 15px; 
+            display: flex; align-items: center; gap: 20px; border: 1px solid #eee; transition: 0.2s;
+        }
+        .my-ad-item:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        
+        .ad-thumb { width: 80px; height: 80px; border-radius: 8px; object-fit: cover; background: #eee; }
+        .ad-info { flex-grow: 1; }
+        .ad-title { font-weight: 700; color: #333; font-size: 16px; margin-bottom: 5px; cursor: pointer; }
+        .ad-price { color: #2962ff; font-weight: 800; }
+        
+        .action-btn { padding: 8px 15px; border-radius: 6px; font-size: 13px; font-weight: 600; border: none; transition: 0.2s; }
+        .btn-edit { background: #ffeb3b; color: #333; margin-right: 5px; }
+        .btn-edit:hover { background: #fdd835; }
+        .btn-delete { background: #ffcdd2; color: #d32f2f; }
+        .btn-delete:hover { background: #ef9a9a; }
+
+        /* MODAL */
+        .modal-content { border-radius: 15px; border: none; }
+        .modal-header { background: #2962ff; color: white; border-radius: 15px 15px 0 0; }
+        .btn-close { filter: invert(1); }
+    </style>
+</head>
+<body>
+
+    <header class="site-header">
+        <a href="index.html" class="header-logo">SawyerS 2.el</a>
+        <div class="header-menu">
+            <a href="index.html"><i class="fa-solid fa-house"></i> Ana Sayfa</a>
+            <a href="mesajlar.html"><i class="fa-solid fa-envelope"></i> Mesajlar</a>
+            <span onclick="logout()" style="margin-left:20px;"><i class="fa-solid fa-right-from-bracket"></i> Çıkış</span>
+        </div>
+    </header>
+
+    <div class="container mb-5">
+        <div class="row">
+            
+            <div class="col-md-4 mb-4">
+                <div class="profile-card text-center">
+                    
+                    <div class="avatar-container" onclick="document.getElementById('fileInput').click()" title="Fotoğrafı Değiştir">
+                        <div class="avatar-circle" id="profileAvatar">?</div>
+                        <div class="avatar-overlay"><i class="fa-solid fa-camera"></i></div>
+                    </div>
+                    <input type="file" id="fileInput" accept="image/*" style="display: none;" onchange="previewImage(event)">
+
+                    <h6 class="text-start mb-3 mt-4">⚙️ Profil Ayarları</h6>
+                    
+                    <form id="profileForm" class="text-start">
+                        <div class="mb-3">
+                            <label class="form-label">Ad Soyad</label>
+                            <input type="text" class="form-control" id="inputName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">E-posta Adresi</label>
+                            <input type="email" class="form-control" id="inputEmail" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Yeni Şifre (İsteğe Bağlı)</label>
+                            <input type="password" class="form-control" id="inputPass" placeholder="Değiştirmek istemiyorsan boş bırak">
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 fw-bold">Bilgileri Güncelle</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="col-md-8">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="fw-bold m-0">📂 Yayındaki İlanlarım</h4>
+                    <a href="ilan-ver.html" class="btn btn-sm btn-success">+ Yeni İlan</a>
+                </div>
+
+                <div id="myAdsList">
+                    <div class="text-center mt-5 text-muted">Yükleniyor...</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="modal fade" id="editModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">✏️ İlanı Düzenle</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="editId">
+                    <div class="mb-3">
+                        <label class="form-label">İlan Başlığı</label>
+                        <input type="text" class="form-control" id="editTitle">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Fiyat (TL)</label>
+                        <input type="number" class="form-control" id="editPrice">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Açıklama</label>
+                        <textarea class="form-control" id="editDesc" rows="4"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                    <button type="button" class="btn btn-primary" onclick="saveAdChanges()">Kaydet</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        const userId = localStorage.getItem('userId');
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!userId) {
+                window.location.href = "giris.html";
+                return;
+            }
+            loadUserProfile();
+            loadMyAds();
+        });
+
+        // --- 1. PROFİL BİLGİLERİNİ GETİR ---
+        async function loadUserProfile() {
+            try {
+                const res = await fetch(`http://localhost:5000/api/user/${userId}`);
+                const user = await res.json();
+                
+                document.getElementById('inputName').value = user.name;
+                document.getElementById('inputEmail').value = user.email || ""; 
+
+                const avatarDisplay = document.getElementById('profileAvatar');
+                
+                // Resim var mı yok mu kontrolü
+                if (user.profileImage && user.profileImage !== "") {
+                    avatarDisplay.innerHTML = `<img src="http://localhost:5000/uploads/${user.profileImage}">`;
+                } else {
+                    avatarDisplay.innerText = user.name ? user.name.charAt(0).toUpperCase() : "?";
+                }
+
+            } catch (err) { 
+                console.error("Profil yüklenemedi:", err); 
+            }
+        }
+
+        // --- 2. PROFİL GÜNCELLEME (Resim Dahil) ---
+        document.getElementById('profileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData();
+            formData.append('name', document.getElementById('inputName').value);
+            formData.append('email', document.getElementById('inputEmail').value);
+            formData.append('password', document.getElementById('inputPass').value);
+
+            // Dosya seçildiyse ekle
+            const fileInput = document.getElementById('fileInput');
+            if (fileInput.files.length > 0) {
+                formData.append('profileImage', fileInput.files[0]);
+            }
+
+            try {
+                const res = await fetch(`http://localhost:5000/api/user/${userId}`, {
+                    method: 'PUT',
+                    body: formData
+                });
+
+                const data = await res.json();
+
+                if(res.ok) {
+                    alert("✅ Bilgiler ve fotoğraf güncellendi!");
+                    localStorage.setItem('userName', data.user.name); 
+                    document.getElementById('inputPass').value = ""; // Şifreyi temizle
+                    loadUserProfile(); // Resmi ve bilgileri tazele
+                } else {
+                    alert("Hata: " + data.error);
+                }
+            } catch (err) { alert("Sunucu hatası oluştu."); }
+        });
+
+        // Resim Önizleme (Dosya seçince anında göster)
+        function previewImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('profileAvatar').innerHTML = `<img src="${e.target.result}">`;
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // --- 3. İLANLARIMI GETİR ---
+        async function loadMyAds() {
+            const list = document.getElementById('myAdsList');
+            try {
+                // Tüm ilanları çekip filtreliyoruz
+                const res = await fetch('http://localhost:5000/api/ilanlar');
+                const allAds = await res.json();
+                
+                // Sadece benim ID'me sahip olanlar
+                const myAds = allAds.filter(ad => ad.sellerId === userId);
+
+                list.innerHTML = ''; // Yükleniyor yazısını sil
+
+                if (myAds.length === 0) {
+                    list.innerHTML = `
+                        <div class="text-center p-5 border rounded bg-white">
+                            <i class="fa-regular fa-folder-open fa-3x text-muted mb-3"></i>
+                            <h5>Hiç ilanınız yok.</h5>
+                            <p class="text-muted">Satmak istediğin bir şeyler varsa hemen ekle!</p>
+                        </div>`;
+                    return;
+                }
+
+                myAds.forEach(ad => {
+                    const price = Number(ad.price).toLocaleString('tr-TR');
+                    let imgUrl = 'https://placehold.co/100?text=No+Img';
+                    if (ad.images && ad.images.length > 0) {
+                        imgUrl = `http://localhost:5000/uploads/${ad.images[0]}`;
+                    }
+                    
+                    // Kesme işareti hatasını önlemek için güvenli veri
+                    const safeTitle = ad.title.replace(/'/g, "\\'"); 
+                    const safeDesc = (ad.description || "").replace(/'/g, "\\'");
+
+                    list.innerHTML += `
+                        <div class="my-ad-item">
+                            <img src="${imgUrl}" class="ad-thumb">
+                            <div class="ad-info">
+                                <div class="ad-title" onclick="window.location.href='ilan-detay.html?id=${ad._id}'">${ad.title}</div>
+                                <div class="ad-price">${price} TL</div>
+                                <small class="text-muted"><i class="fa-solid fa-eye"></i> Yayında</small>
+                            </div>
+                            <div>
+                                <button class="action-btn btn-edit" 
+                                    onclick="openEditModal('${ad._id}', '${safeTitle}', '${ad.price}', '${safeDesc}')">
+                                    <i class="fa-solid fa-pen"></i> Düzenle
+                                </button>
+                                <button class="action-btn btn-delete" onclick="deleteAd('${ad._id}')">
+                                    <i class="fa-solid fa-trash"></i> Sil
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+
+            } catch (err) { 
+                console.error(err);
+                list.innerHTML = '<div class="text-danger text-center">İlanlar yüklenirken hata oluştu.</div>';
+            }
+        }
+
+        // --- 4. SİLME ---
+        async function deleteAd(id) {
+            if(!confirm("Bu ilanı yayından kaldırmak istediğinize emin misiniz?")) return;
+            try {
+                const res = await fetch(`http://localhost:5000/api/ilanlar/${id}/${userId}`, {
+                    method: 'DELETE'
+                });
+                if(res.ok) {
+                    loadMyAds(); // Listeyi yenile
+                } else {
+                    alert("Silinemedi. Yetki hatası olabilir.");
+                }
+            } catch(e) { alert("Hata oluştu."); }
+        }
+
+        // --- 5. DÜZENLEME ---
+        const editModal = new bootstrap.Modal(document.getElementById('editModal'));
+
+        function openEditModal(id, title, price, desc) {
+            document.getElementById('editId').value = id;
+            document.getElementById('editTitle').value = title;
+            document.getElementById('editPrice').value = price;
+            document.getElementById('editDesc').value = desc;
+            editModal.show();
+        }
+
+        async function saveAdChanges() {
+            const id = document.getElementById('editId').value;
+            const title = document.getElementById('editTitle').value;
+            const price = document.getElementById('editPrice').value;
+            const desc = document.getElementById('editDesc').value;
+
+            try {
+                const res = await fetch(`http://localhost:5000/api/ilanlar/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title, price, description: desc })
+                });
+
+                if(res.ok) {
+                    alert("✨ İlan güncellendi!");
+                    editModal.hide();
+                    loadMyAds();
+                } else {
+                    alert("Güncelleme başarısız.");
+                }
+            } catch (err) { alert("Sunucu hatası."); }
+        }
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>

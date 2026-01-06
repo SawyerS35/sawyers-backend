@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SawyerS 2.el - Ana Sayfa</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f7f6; }
+        
+        /* HEADER TASARIMI */
+        .site-header {
+            background: linear-gradient(90deg, #2962ff, #1a4bd6);
+            padding: 15px 40px; display: flex; justify-content: space-between; align-items: center;
+            color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); position: sticky; top:0; z-index: 1000;
+        }
+        .header-logo { font-size: 26px; font-weight: 800; color: white; text-decoration: none; }
+        
+        .header-menu { display: flex; align-items: center; gap: 20px; }
+        .menu-item {
+            color: white; text-decoration: none; font-weight: 600; display: flex; flex-direction: column; 
+            align-items: center; font-size: 13px; transition: 0.3s; cursor: pointer;
+        }
+        .menu-item:hover { transform: translateY(-3px); opacity: 0.9; }
+        .menu-item i { font-size: 20px; margin-bottom: 5px; }
+
+        .header-cta-btn {
+            background-color: #ff0055; color: white; padding: 10px 25px; border-radius: 30px;
+            text-decoration: none; font-weight: bold; display: flex; align-items: center; gap: 8px;
+            transition: 0.3s; box-shadow: 0 4px 15px rgba(255, 0, 85, 0.4);
+        }
+        .header-cta-btn:hover { background-color: #d60047; transform: scale(1.05); }
+
+        /* ANA İÇERİK DÜZENİ */
+        .main-container { max-width: 1200px; margin: 30px auto; display: flex; gap: 30px; padding: 0 20px; }
+
+        /* SOL KATEGORİ MENÜSÜ */
+        .sidebar { width: 250px; flex-shrink: 0; }
+        .category-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 100px; }
+        .cat-title { font-weight: 700; margin-bottom: 15px; font-size: 16px; border-bottom: 1px solid #eee; padding-bottom: 10px;}
+        
+        .cat-link { 
+            display: flex; align-items: center; gap: 10px; color: #555; text-decoration: none; 
+            padding: 10px; border-radius: 8px; transition: 0.2s; margin-bottom: 5px; cursor: pointer;
+        }
+        .cat-link:hover { background-color: #f0f4ff; color: #2962ff; }
+        .cat-link.active { background-color: #2962ff; color: white; font-weight: bold; }
+        .cat-link i { width: 20px; text-align: center; }
+
+        /* SAĞ TARAF (BANNER + İLANLAR) */
+        .content-area { flex-grow: 1; }
+
+        /* BANNER ve ARAMA KUTUSU (GÜNCELLENDİ) */
+        .hero-banner {
+            background: linear-gradient(135deg, #7b1fa2, #4a148c);
+            color: white; padding: 40px; border-radius: 15px; text-align: center; margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(74, 20, 140, 0.3);
+        }
+        .hero-banner h2 { font-weight: 800; margin-bottom: 15px; }
+        
+        .search-box {
+            background: white; max-width: 600px; margin: 0 auto; border-radius: 30px;
+            display: flex; align-items: center; padding: 5px; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        /* YENİ: Arama içindeki Kategori Seçimi */
+        .search-select {
+            border: none; background: transparent; padding: 10px 15px; font-size: 14px;
+            border-right: 1px solid #eee; color: #555; font-weight: 600; outline: none; cursor: pointer;
+            max-width: 150px;
+        }
+        
+        .search-input {
+            border: none; outline: none; flex-grow: 1; font-size: 15px; color: #333; padding: 0 15px;
+        }
+        .search-btn {
+            background-color: #2962ff; color: white; border: none; width: 40px; height: 40px;
+            border-radius: 50%; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        }
+        .search-btn:hover { background-color: #1a4bd6; }
+
+        /* İLAN GRID */
+        .ads-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
+        
+        .ad-card {
+            background: white; border-radius: 10px; overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: 0.3s; cursor: pointer; border: 1px solid #eee;
+        }
+        .ad-card:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+        
+        .ad-image { height: 180px; width: 100%; object-fit: cover; background: #eee; }
+        .ad-details { padding: 15px; }
+        .ad-title { font-weight: 600; font-size: 15px; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #333; }
+        .ad-price { color: #2962ff; font-weight: 800; font-size: 18px; display: block; margin-bottom: 8px; }
+        .ad-meta { font-size: 12px; color: #888; display: flex; justify-content: space-between; }
+
+        .loading-state { text-align: center; padding: 50px; color: #777; width: 100%; grid-column: 1/-1; }
+        
+        /* MOBİL UYUM */
+        @media (max-width: 768px) {
+            .main-container { flex-direction: column; }
+            .sidebar { width: 100%; }
+            .search-select { display: none; } /* Mobilde yer kaplamasın diye gizleyebiliriz veya küçültebiliriz */
+        }
+    </style>
+</head>
+<body>
+
+    <header class="site-header">
+        <a href="index.html" class="header-logo">SawyerS 2.el</a>
+
+        <div class="header-menu">
+            <div id="guest-menu" style="display: flex; gap: 20px;">
+                <a href="giris.html" class="menu-item"><i class="fa-solid fa-key"></i> Giriş Yap</a>
+                <a href="giris.html?mode=register" class="menu-item"><i class="fa-solid fa-user-plus"></i> Üye Ol</a>
+            </div>
+
+            <div id="member-menu" style="display: none; gap: 20px;">
+                <div id="adminBtnArea"></div>
+                <a href="favoriler.html" class="menu-item"><i class="fa-solid fa-heart"></i> Favoriler</a>
+                <a href="mesajlar.html" class="menu-item"><i class="fa-solid fa-envelope"></i> Mesajlar</a>
+                <a href="hesabim.html" class="menu-item"><i class="fa-solid fa-user"></i> Hesabım</a>
+                <div onclick="logout()" class="menu-item" style="color: #ffcccc;"><i class="fa-solid fa-right-from-bracket"></i> Çıkış</div>
+            </div>
+
+            <a href="ilan-ver.html" class="header-cta-btn"><i class="fa-solid fa-camera"></i> İlan Ver</a>
+        </div>
+    </header>
+
+    <div class="main-container">
+        
+        <aside class="sidebar">
+            <div class="category-card">
+                <div class="cat-title">Kategoriler</div>
+                <div class="cat-link active" onclick="sidebarFilter('Tümü', this)"><i class="fa-solid fa-layer-group"></i> Tüm İlanlar</div>
+                <div class="cat-link" onclick="sidebarFilter('Vasıta', this)"><i class="fa-solid fa-car"></i> Vasıta</div>
+                <div class="cat-link" onclick="sidebarFilter('Emlak', this)"><i class="fa-solid fa-house"></i> Emlak</div>
+                <div class="cat-link" onclick="sidebarFilter('Elektronik', this)"><i class="fa-solid fa-mobile-screen"></i> Elektronik</div>
+                <div class="cat-link" onclick="sidebarFilter('Ev Eşyası', this)"><i class="fa-solid fa-couch"></i> Ev Eşyası</div>
+                <div class="cat-link" onclick="sidebarFilter('Giyim & Moda', this)"><i class="fa-solid fa-shirt"></i> Giyim & Moda</div>
+                <div class="cat-link" onclick="sidebarFilter('Yedek Parça', this)"><i class="fa-solid fa-gears"></i> Yedek Parça</div>
+                <div class="cat-link" onclick="sidebarFilter('Diğer / Her Şey', this)"><i class="fa-solid fa-box-open"></i> Diğer</div>
+            </div>
+        </aside>
+
+        <main class="content-area">
+            
+            <div class="hero-banner">
+                <h2>Hayalindeki ürüne hemen ulaş!</h2>
+                <div class="search-box">
+                    <select id="searchCategory" class="search-select">
+                        <option value="all">Tüm Kategoriler</option>
+                        <option value="Vasıta">Vasıta</option>
+                        <option value="Emlak">Emlak</option>
+                        <option value="Elektronik">Elektronik</option>
+                        <option value="Ev Eşyası">Ev Eşyası</option>
+                        <option value="Giyim & Moda">Giyim</option>
+                        <option value="Yedek Parça">Yedek Parça</option>
+                        <option value="Diğer / Her Şey">Diğer</option>
+                    </select>
+                    
+                    <input type="text" id="searchInput" class="search-input" placeholder="Kelime veya şehir ara... (Örn: BMW, İzmir)">
+                    
+                    <button class="search-btn"><i class="fa-solid fa-magnifying-glass"></i></button>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h4 style="font-weight: 700; margin: 0;" id="vitrinTitle">Vitrin İlanları</h4>
+                <span style="font-size: 14px; color: #666;" id="resultCount"></span>
+            </div>
+
+            <div id="adsGrid" class="ads-grid">
+                <div class="loading-state"><i class="fa-solid fa-circle-notch fa-spin fa-2x"></i> <br><br> İlanlar Yükleniyor...</div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        let allAdsData = []; 
+
+        document.addEventListener('DOMContentLoaded', function() {
+            checkLoginStatus(); 
+            loadAds();
+
+            // ARAMA DİNLEYİCİLERİ (Hem metin hem kategori değişince tetiklenir)
+            const searchInput = document.getElementById('searchInput');
+            const searchCategory = document.getElementById('searchCategory');
+
+            function performSearch() {
+                const text = searchInput.value.toLowerCase();
+                const category = searchCategory.value;
+
+                const filtered = allAdsData.filter(ad => {
+                    // 1. Metin Eşleşmesi (Başlık veya Şehir)
+                    const textMatch = ad.title.toLowerCase().includes(text) || (ad.city && ad.city.toLowerCase().includes(text));
+                    
+                    // 2. Kategori Eşleşmesi
+                    const catMatch = category === 'all' || (ad.category && ad.category === category);
+
+                    return textMatch && catMatch;
+                });
+
+                // UI Güncelle
+                let titleText = "Vitrin İlanları";
+                if(text) titleText = `"${text}" için sonuçlar`;
+                if(category !== 'all') titleText += ` (${category})`;
+
+                document.getElementById('vitrinTitle').innerText = titleText;
+                
+                // Sidebar'daki aktifliği kaldır (Çünkü üstten arama yapılıyor)
+                document.querySelectorAll('.cat-link').forEach(el => el.classList.remove('active'));
+
+                renderAds(filtered);
+            }
+
+            searchInput.addEventListener('input', performSearch);
+            searchCategory.addEventListener('change', performSearch);
+        });
+
+        // --- SOL MENÜ FİLTRELEME (SIDEBAR) ---
+        function sidebarFilter(category, element) {
+            // Üstteki arama kutularını sıfırla
+            document.getElementById('searchInput').value = '';
+            document.getElementById('searchCategory').value = 'all';
+
+            // Aktif sınıfını değiştir
+            document.querySelectorAll('.cat-link').forEach(el => el.classList.remove('active'));
+            element.classList.add('active');
+
+            document.getElementById('vitrinTitle').innerText = category === 'Tümü' ? "Vitrin İlanları" : category + " İlanları";
+
+            if (category === 'Tümü') {
+                renderAds(allAdsData);
+            } else {
+                const filtered = allAdsData.filter(ad => ad.category && ad.category.includes(category));
+                renderAds(filtered);
+            }
+        }
+
+        // --- STANDART FONKSİYONLAR ---
+        function checkLoginStatus() {
+            const guestMenu = document.getElementById('guest-menu');
+            const memberMenu = document.getElementById('member-menu');
+            const adminArea = document.getElementById('adminBtnArea');
+
+            const isLoggedIn = localStorage.getItem('userLoggedIn') === 'true';
+            const isAdmin = localStorage.getItem('isAdmin') === 'true';
+
+            if (isLoggedIn) {
+                guestMenu.style.display = 'none';
+                memberMenu.style.display = 'flex';
+                if (isAdmin) {
+                    adminArea.innerHTML = `<a href="admin.html" class="menu-item" style="color: #ffeb3b;"><i class="fa-solid fa-bolt"></i> Panel</a>`;
+                }
+            } else {
+                guestMenu.style.display = 'flex';
+                memberMenu.style.display = 'none';
+            }
+        }
+
+        function logout() {
+            if(confirm("Çıkış yapmak istediğinize emin misiniz?")) {
+                localStorage.clear();
+                window.location.reload();
+            }
+        }
+
+        async function loadAds() {
+            const grid = document.getElementById('adsGrid');
+            try {
+                const response = await fetch('http://localhost:5000/api/ilanlar');
+                const ads = await response.json();
+                allAdsData = ads;
+                renderAds(allAdsData);
+            } catch (error) {
+                console.error(error);
+                grid.innerHTML = '<div class="loading-state text-danger">Sunucuya bağlanılamadı.</div>';
+            }
+        }
+
+        function renderAds(adsList) {
+            const grid = document.getElementById('adsGrid');
+            const countLabel = document.getElementById('resultCount');
+            grid.innerHTML = ''; 
+
+            if (adsList.length === 0) {
+                grid.innerHTML = `
+                    <div class="loading-state">
+                        <i class="fa-regular fa-face-frown fa-3x"></i>
+                        <h5 class="mt-3">Sonuç Bulunamadı</h5>
+                        <p>Kriterlere uygun ilan yok.</p>
+                    </div>`;
+                countLabel.innerText = "0 İlan";
+                return;
+            }
+
+            countLabel.innerText = `${adsList.length} İlan`;
+
+            adsList.forEach(ad => {
+                const price = Number(ad.price).toLocaleString('tr-TR');
+                const city = ad.city || 'Şehir Yok';
+                const date = new Date(ad.date).toLocaleDateString('tr-TR');
+                let imgUrl = 'https://placehold.co/400x300?text=Resim+Yok';
+                if (ad.images && ad.images.length > 0) imgUrl = `http://localhost:5000/uploads/${ad.images[0]}`;
+
+                const html = `
+                    <div class="ad-card" onclick="window.location.href='ilan-detay.html?id=${ad._id}'">
+                        <img src="${imgUrl}" class="ad-image" alt="${ad.title}">
+                        <div class="ad-details">
+                            <div class="ad-title" title="${ad.title}">${ad.title}</div>
+                            <span class="ad-price">${price} TL</span>
+                            <div class="ad-meta">
+                                <span><i class="fa-solid fa-location-dot"></i> ${city}</span>
+                                <span>${date}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                grid.innerHTML += html;
+            });
+        }
+    </script>
+</body>
+</html>

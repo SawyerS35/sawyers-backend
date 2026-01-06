@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>İlan Detayı - SawyerS 2.el</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* --- GENEL AYARLAR --- */
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #f4f7f6; color: #333; }
+        
+        /* HEADER */
+        .site-header { background-color: #2962ff; padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; }
+        .header-logo { font-size: 26px; font-weight: 800; color: white; text-decoration: none; }
+        
+        /* --- DETAY SAYFASI ÖZEL STİLLERİ --- */
+        .detail-container { max-width: 1100px; margin: 30px auto; padding: 0 15px; }
+        
+        /* SOL TARAF: SLIDER ALANI */
+        .product-image-box {
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            height: 500px;
+            position: relative;
+        }
+
+        /* Carousel Resim Ayarları */
+        .carousel-item { height: 500px; background-color: #f8f9fa; }
+        .carousel-item img { width: 100%; height: 100%; object-fit: contain; }
+
+        .carousel-control-prev-icon,
+        .carousel-control-next-icon {
+            background-color: rgba(0,0,0,0.5);
+            border-radius: 50%;
+            padding: 20px;
+        }
+
+        .product-info-box {
+            background: #fff; border-radius: 12px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        /* SAĞ TARAF */
+        .price-card {
+            background: #fff; border-radius: 12px; padding: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-align: center; position: sticky; top: 20px;
+        }
+        .price-amount { font-size: 32px; font-weight: 800; color: #2962ff; display: block; margin-bottom: 20px; }
+        
+        .seller-info { border-top: 1px solid #eee; margin-top: 20px; padding-top: 20px; text-align: left; }
+        .seller-avatar { width: 50px; height: 50px; background: #eee; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #888; margin-right: 10px; }
+
+        .detail-table tr td { padding: 10px; border-bottom: 1px solid #f0f0f0; }
+        .detail-table tr td:first-child { font-weight: 600; width: 150px; color: #666; }
+        .description-text { line-height: 1.6; color: #555; white-space: pre-wrap; }
+
+        .btn-message { background-color: #2962ff; color: white; width: 100%; font-weight: 600; padding: 12px; margin-bottom: 10px; transition: 0.3s;}
+        .btn-message:hover { background-color: #1a4bd6; color: white; }
+        
+        .btn-phone { background-color: #fff; color: #333; border: 2px solid #ddd; width: 100%; font-weight: 600; padding: 12px; transition: 0.3s; }
+        .btn-phone:hover { background-color: #f9f9f9; }
+        .btn-phone.active-phone { background-color: #198754; color: white; border-color: #198754; }
+
+        /* --- POP-UP (MODAL) STİLLERİ --- */
+        .custom-modal {
+            display: none;
+            position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.6);
+            align-items: center; justify-content: center;
+        }
+        .modal-content {
+            background-color: white; padding: 30px; border-radius: 15px; width: 90%; max-width: 400px;
+            text-align: center; box-shadow: 0 5px 30px rgba(0,0,0,0.3); position: relative;
+            animation: slideDown 0.3s ease-out;
+        }
+        @keyframes slideDown { from {transform: translateY(-50px); opacity: 0;} to {transform: translateY(0); opacity: 1;} }
+        
+        .close-modal { position: absolute; top: 15px; right: 20px; font-size: 24px; cursor: pointer; color: #aaa; }
+        .close-modal:hover { color: #333; }
+        
+        .modal-icon { font-size: 50px; color: #2962ff; margin-bottom: 15px; }
+        .modal-btn { width: 100%; padding: 12px; border-radius: 8px; font-weight: bold; margin-top: 10px; cursor: pointer; transition: 0.2s; border: none; }
+        .btn-login-modal { background-color: #2962ff; color: white; }
+        .btn-login-modal:hover { background-color: #1a4bd6; }
+        .btn-register-modal { background-color: #e3f2fd; color: #2962ff; }
+        .btn-register-modal:hover { background-color: #bbdefb; }
+
+    </style>
+</head>
+<body>
+
+    <header class="site-header">
+        <a href="index.html" class="header-logo"><i class="fa-solid fa-arrow-left"></i> SawyerS 2.el</a>
+    </header>
+
+    <div class="detail-container" id="loadingArea">
+        <h3 class="text-center mt-5">⏳ İlan detayları yükleniyor...</h3>
+    </div>
+
+    <div class="detail-container row" id="contentArea" style="display: none;">
+        
+        <div class="col-lg-8">
+            <h2 id="pageTitle" class="mb-3 fw-bold d-block d-lg-none">...</h2>
+
+            <div class="product-image-box">
+                <div id="mainCarousel" class="carousel slide h-100" data-bs-ride="false">
+                    <div class="carousel-inner h-100" id="carouselWrapper"></div>
+                    <button class="carousel-control-prev" type="button" data-bs-target="#mainCarousel" data-bs-slide="prev" id="prevBtn">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Önceki</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#mainCarousel" data-bs-slide="next" id="nextBtn">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Sonraki</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="product-info-box">
+                <h4 class="fw-bold mb-4">İlan Bilgileri</h4>
+                <table class="table detail-table">
+                    <tr><td>İlan No</td><td id="detailId">#...</td></tr>
+                    <tr><td>İlan Tarihi</td><td id="detailDate">...</td></tr>
+                    <tr><td>Konum</td><td id="detailCity">...</td></tr>
+                    <tr><td>Kategori</td><td id="detailCategory">...</td></tr>
+                </table>
+
+                <h4 class="fw-bold mt-5 mb-3">Açıklama</h4>
+                <div id="detailDesc" class="description-text">...</div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="price-card">
+                <button id="btnFav" class="btn btn-outline-danger w-100 rounded-pill mb-2">
+                    <i class="fa-regular fa-heart"></i> Favorilere Ekle
+                </button>
+                <h4 id="sidebarTitle" class="mb-3 fw-bold d-none d-lg-block text-start">...</h4>
+                <span id="detailPrice" class="price-amount">... TL</span>
+
+                <button id="btnMesaj" class="btn btn-message rounded-pill">
+                    <i class="fa-solid fa-comment-dots"></i> Satıcıya Mesaj At
+                </button>
+                
+                <button id="btnTelefon" class="btn btn-phone rounded-pill">
+                    <i class="fa-solid fa-phone"></i> Numarayı Göster
+                </button>
+
+                <div class="seller-info d-flex align-items-center">
+                    <div class="seller-avatar"><i class="fa-solid fa-user"></i></div>
+                    <div>
+                        <div class="fw-bold" id="sellerName">Satıcı</div>
+                        <div class="small text-muted">SawyerS Üyesi</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="authModal" class="custom-modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <div class="modal-icon"><i class="fa-solid fa-lock"></i></div>
+            <h3>Giriş Yapmalısın</h3>
+            <p class="text-muted">Satıcıya mesaj göndermek için lütfen hesabına giriş yap veya ücretsiz üye ol.</p>
+            
+            <button class="modal-btn btn-login-modal" onclick="window.location.href='giris.html'">Giriş Yap</button>
+            <button class="modal-btn btn-register-modal" onclick="window.location.href='giris.html?mode=register'">Hemen Üye Ol</button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Modal Elementleri
+        const authModal = document.getElementById('authModal');
+
+        function openModal() { if(authModal) authModal.style.display = 'flex'; }
+        function closeModal() { if(authModal) authModal.style.display = 'none'; }
+        
+        window.onclick = function(event) {
+            if (event.target == authModal) closeModal();
+        }
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            const loadingArea = document.getElementById('loadingArea');
+            const contentArea = document.getElementById('contentArea');
+            
+            // 1. URL'den ID Kontrolü
+            const urlParams = new URLSearchParams(window.location.search);
+            const ilanId = urlParams.get('id');
+
+            console.log("Aranan İlan ID:", ilanId);
+
+            if (!ilanId || ilanId === 'undefined') {
+                loadingArea.innerHTML = `<h3 class="text-danger text-center mt-5">Hata: Geçersiz İlan ID!</h3><p class="text-center">Lütfen ana sayfadan tekrar tıklayın.</p>`;
+                return;
+            }
+
+            try {
+                // 2. Verileri Çek
+                const response = await fetch('http://localhost:5000/api/ilanlar');
+                if (!response.ok) throw new Error(`Sunucu Hatası: ${response.status}`);
+
+                const ilanlar = await response.json();
+                if (!Array.isArray(ilanlar)) throw new Error("Veri hatası.");
+
+                // 3. İlanı Bul
+                const secilenIlan = ilanlar.find(i => i._id == ilanId || i.id == ilanId);
+
+                if (!secilenIlan) {
+                    loadingArea.innerHTML = `<h3 class="text-center mt-5">😞 İlan bulunamadı.</h3><p class="text-center">Silinmiş veya yayından kaldırılmış olabilir.</p>`;
+                    return;
+                }
+
+                // --- 4. VERİLERİ YERLEŞTİR ---
+                const carouselWrapper = document.getElementById('carouselWrapper');
+                const resimler = secilenIlan.images || [];
+
+                if (carouselWrapper) {
+                    carouselWrapper.innerHTML = ''; 
+                    if (resimler.length > 0) {
+                        resimler.forEach((resim, index) => {
+                            const activeClass = index === 0 ? 'active' : '';
+                            const imgUrl = `http://localhost:5000/uploads/${resim}`;
+                            const slideHTML = `<div class="carousel-item ${activeClass}"><img src="${imgUrl}" class="d-block w-100" alt="Resim" onerror="this.src='https://placehold.co/800x600?text=Resim+Yüklenemedi'"></div>`;
+                            carouselWrapper.innerHTML += slideHTML;
+                        });
+                        const prevBtn = document.getElementById('prevBtn');
+                        const nextBtn = document.getElementById('nextBtn');
+                        if (resimler.length < 2 && prevBtn && nextBtn) {
+                            prevBtn.style.display = 'none';
+                            nextBtn.style.display = 'none';
+                        }
+                    } else {
+                        carouselWrapper.innerHTML = `<div class="carousel-item active"><img src="https://placehold.co/800x600?text=Resim+Yok" class="d-block w-100" alt="Resim Yok"></div>`;
+                        const prevBtn = document.getElementById('prevBtn');
+                        const nextBtn = document.getElementById('nextBtn');
+                        if (prevBtn) prevBtn.style.display = 'none';
+                        if (nextBtn) nextBtn.style.display = 'none';
+                    }
+                }
+
+                const setText = (id, val) => { const el = document.getElementById(id); if(el) el.innerText = val; };
+
+                setText('pageTitle', secilenIlan.title);
+                setText('sidebarTitle', secilenIlan.title);
+                setText('detailPrice', Number(secilenIlan.price).toLocaleString('tr-TR') + ' TL');
+                setText('detailDate', new Date(secilenIlan.date).toLocaleDateString('tr-TR'));
+                setText('detailCity', (secilenIlan.city || '') + (secilenIlan.district ? ' / ' + secilenIlan.district : ''));
+                setText('detailCategory', secilenIlan.category || 'Genel');
+                setText('detailId', "#" + (secilenIlan._id || ilanId).toString().slice(-6));
+                setText('detailDesc', secilenIlan.description || "Açıklama girilmemiş.");
+                setText('sellerName', secilenIlan.sellerName || "Satıcı");
+
+                // --- GÜNCELLENEN BUTON İŞLEVLERİ ---
+                const btnMesaj = document.getElementById('btnMesaj');
+                const btnTelefon = document.getElementById('btnTelefon');
+
+                if (btnMesaj) {
+                    btnMesaj.onclick = function() {
+                        const isLoggedIn = localStorage.getItem('userLoggedIn') === 'true';
+                        
+                        // 1. Giriş Kontrolü
+                        if (!isLoggedIn) {
+                            openModal();
+                            return;
+                        }
+
+                        // 2. Kendi İlanına Mesaj Atma Engeli
+                        const myId = localStorage.getItem('userId');
+                        if (secilenIlan.sellerId === myId) {
+                            alert("Kendi ilanınıza mesaj atamazsınız!");
+                            return;
+                        }
+
+                        // 3. Doğru ID ile Mesajlar Sayfasına Yönlendirme
+                        const targetId = secilenIlan._id || ilanId;
+                        window.location.href = `mesajlar.html?ilanId=${targetId}`;
+                    };
+                }
+
+                if (btnTelefon) {
+                    const telefonNo = secilenIlan.phone || secilenIlan.contact || "0555 123 45 67";
+                    btnTelefon.onclick = function() {
+                        const icon = `<i class="fa-solid fa-phone"></i>`;
+                        const temizNumara = telefonNo.replace(/\s/g, '');
+                        this.innerHTML = `${icon} ${telefonNo}`;
+                        this.classList.add("active-phone");
+                        window.location.href = `tel:${temizNumara}`;
+                    };
+                }
+
+                // Favori Kontrolü (Aynen korundu)
+                const btnFav = document.getElementById('btnFav');
+                const userId = localStorage.getItem('userId');
+                const isLoggedIn = localStorage.getItem('userLoggedIn') === 'true';
+
+                if (btnFav && isLoggedIn && userId) {
+                    try {
+                        const userRes = await fetch(`http://localhost:5000/api/user/${userId}`);
+                        if(userRes.ok) {
+                            const userData = await userRes.json();
+                            if (userData.favorites && userData.favorites.includes(ilanId)) {
+                                btnFav.innerHTML = `<i class="fa-solid fa-heart"></i> Favorilerden Çıkar`;
+                                btnFav.classList.remove('btn-outline-danger');
+                                btnFav.classList.add('btn-danger');
+                            }
+                        }
+                    } catch (e) { console.log("Fav kontrol hatası:", e); }
+                    
+                    btnFav.onclick = async function() {
+                        if (!isLoggedIn) { openModal(); return; }
+                        try {
+                            const res = await fetch('http://localhost:5000/api/favorites/toggle', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ userId: userId, adId: ilanId })
+                            });
+                            const data = await res.json();
+                            if (data.status === 'added') {
+                                this.innerHTML = `<i class="fa-solid fa-heart"></i> Favorilerden Çıkar`;
+                                this.classList.remove('btn-outline-danger'); this.classList.add('btn-danger');
+                            } else {
+                                this.innerHTML = `<i class="fa-regular fa-heart"></i> Favorilere Ekle`;
+                                this.classList.remove('btn-danger'); this.classList.add('btn-outline-danger');
+                            }
+                        } catch (err) { alert("İşlem başarısız!"); }
+                    };
+                }
+
+                loadingArea.style.display = 'none';
+                contentArea.style.display = 'flex';
+
+            } catch (error) {
+                console.error("HATA:", error);
+                loadingArea.innerHTML = `
+                    <div class="alert alert-danger text-center mt-5">
+                        <h4>⚠️ Bir Hata Oluştu</h4>
+                        <p>${error.message}</p>
+                        <small>Detaylar için tarayıcı konsoluna (F12) bakınız.</small>
+                    </div>`;
+            }
+        });
+    </script>
+</body>
+</html>

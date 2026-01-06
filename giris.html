@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giriş Yap / Üye Ol</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body { font-family: sans-serif; background: linear-gradient(135deg, #2962ff, #1a4bd6); height: 100vh; display: flex; align-items: center; justify-content: center; margin: 0; }
+        .container { background: white; width: 400px; border-radius: 10px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .tabs { display: flex; cursor: pointer; background: #f1f1f1; }
+        .tab { flex: 1; padding: 15px; text-align: center; font-weight: bold; color: #555; }
+        .tab.active { background: white; color: #2962ff; border-top: 3px solid #2962ff; }
+        .form-box { padding: 30px; }
+        .input-group { position: relative; margin-bottom: 15px; }
+        .input-group i { position: absolute; left: 15px; top: 12px; color: #aaa; }
+        input { width: 100%; padding: 10px 10px 10px 40px; border: 2px solid #eee; border-radius: 5px; box-sizing: border-box; outline: none; }
+        input:focus { border-color: #2962ff; }
+        button { width: 100%; padding: 12px; background: #2962ff; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        button:hover { background: #1a4bd6; }
+        .error { color: red; font-size: 13px; margin-bottom: 10px; display: none; text-align: center;}
+        #registerForm { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="tabs">
+            <div class="tab active" onclick="openTab('login')">Giriş Yap</div>
+            <div class="tab" onclick="openTab('register')">Üye Ol</div>
+        </div>
+
+        <div class="form-box">
+            <div id="errorMsg" class="error"></div>
+
+            <form id="loginForm">
+                <h3 style="text-align:center; margin-top:0;">Hoş Geldiniz 👋</h3>
+                <div class="input-group"><i class="fa-solid fa-envelope"></i><input type="email" id="loginEmail" placeholder="E-posta" required></div>
+                <div class="input-group"><i class="fa-solid fa-lock"></i><input type="password" id="loginPass" placeholder="Şifre" required></div>
+                <button type="submit">Giriş Yap</button>
+            </form>
+
+            <form id="registerForm">
+                <h3 style="text-align:center; margin-top:0;">Hesap Oluştur 🚀</h3>
+                <div class="input-group"><i class="fa-solid fa-user"></i><input type="text" id="regName" placeholder="Ad Soyad" required></div>
+                <div class="input-group"><i class="fa-solid fa-envelope"></i><input type="email" id="regEmail" placeholder="E-posta" required></div>
+                <div class="input-group"><i class="fa-solid fa-lock"></i><input type="password" id="regPass" placeholder="Şifre (Min 6 karakter)" required></div>
+                <button type="submit">Üye Ol</button>
+            </form>
+            
+            <a href="index.html" style="display:block; text-align:center; margin-top:15px; color:#888; text-decoration:none; font-size:12px;">← Ana Sayfaya Dön</a>
+        </div>
+    </div>
+
+    <script>
+        const errorMsg = document.getElementById('errorMsg');
+
+        function openTab(tabName) {
+            errorMsg.style.display = 'none';
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            if(tabName === 'login') {
+                document.getElementById('loginForm').style.display = 'block';
+                document.getElementById('registerForm').style.display = 'none';
+                document.querySelectorAll('.tab')[0].classList.add('active');
+            } else {
+                document.getElementById('loginForm').style.display = 'none';
+                document.getElementById('registerForm').style.display = 'block';
+                document.querySelectorAll('.tab')[1].classList.add('active');
+            }
+        }
+
+        // --- ÜYE OL ---
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            errorMsg.style.display = 'none';
+
+            const name = document.getElementById('regName').value;
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPass').value;
+
+            try {
+                const res = await fetch('http://localhost:5000/api/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, password })
+                });
+                const data = await res.json();
+
+                if(res.ok) {
+                    alert("Kayıt Başarılı! Giriş yapabilirsiniz.");
+                    openTab('login');
+                } else {
+                    errorMsg.innerText = data.error || "Kayıt başarısız.";
+                    errorMsg.style.display = 'block';
+                }
+            } catch(err) {
+                console.error(err);
+                alert("Sunucu hatası!");
+            }
+        });
+
+        // --- GİRİŞ YAP ---
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            errorMsg.style.display = 'none';
+
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPass').value;
+
+            try {
+                const res = await fetch('http://localhost:5000/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+
+                if(res.ok) {
+                    // Kaydet
+                    localStorage.setItem('userLoggedIn', 'true');
+                    localStorage.setItem('userName', data.user.name);
+                    localStorage.setItem('userId', data.user._id);
+                    localStorage.setItem('isAdmin', data.user.isAdmin);
+
+                    // Yönlendirme
+                    if(data.user.isAdmin) {
+                        if(confirm("Yönetici girişi! Admin paneline gitmek ister misiniz?")) {
+                            window.location.href = "admin.html";
+                        } else {
+                            window.location.href = "index.html";
+                        }
+                    } else {
+                        window.location.href = "index.html";
+                    }
+                } else {
+                    errorMsg.innerText = data.error || "Giriş başarısız.";
+                    errorMsg.style.display = 'block';
+                }
+            } catch(err) {
+                console.error(err);
+                alert("Sunucuya bağlanılamadı. (Node.js açık mı?)");
+            }
+        });
+
+        // URL'den kontrol (?mode=register)
+        if(window.location.search.includes('register')) openTab('register');
+    </script>
+
+</body>
+</html>

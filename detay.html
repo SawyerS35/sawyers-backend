@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SawyerS - İlan Detayı</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #6a11cb;
+            --secondary: #2575fc;
+            --accent: #ff0080;
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-dark: #333;
+            --gray: #777;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-dark); }
+
+        /* --- Header (Aynısı) --- */
+        header {
+            background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .logo { font-size: 1.5rem; font-weight: bold; letter-spacing: 1px; cursor: pointer; }
+        .logo a { text-decoration: none; color: white; }
+
+        /* --- Sayfa Düzeni --- */
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            display: flex;
+            gap: 20px;
+            padding: 0 15px;
+        }
+
+        /* --- Sol Kolon (Resimler ve Açıklama) --- */
+        .left-column { flex: 2; }
+
+        .gallery-card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+
+        .main-image {
+            width: 100%;
+            height: 450px;
+            object-fit: cover;
+            border-radius: 10px;
+            cursor: zoom-in;
+        }
+
+        .thumbnails {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            overflow-x: auto;
+        }
+
+        .thumb {
+            width: 80px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
+            cursor: pointer;
+            opacity: 0.6;
+            transition: 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .thumb:hover, .thumb.active {
+            opacity: 1;
+            border-color: var(--primary);
+        }
+
+        /* İlan Başlığı ve Navigasyon */
+        .breadcrumb { margin-bottom: 15px; color: var(--gray); font-size: 0.9rem; }
+        .listing-title { font-size: 1.8rem; margin-bottom: 20px; color: #222; }
+
+        /* Özellikler Tablosu */
+        .details-section {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+
+        .details-section h3 {
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
+
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .info-table tr:nth-child(odd) { background-color: #f9f9f9; }
+        
+        .info-table td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .info-table td:first-child { font-weight: bold; width: 30%; color: #555; }
+
+        .description-text {
+            line-height: 1.6;
+            color: #444;
+        }
+
+        /* --- Sağ Kolon (Fiyat ve Satıcı) --- */
+        .right-column { flex: 1; }
+
+        /* Bu kart aşağı kaydırılsa bile sabit kalır */
+        .sticky-sidebar {
+            position: sticky;
+            top: 20px;
+        }
+
+        .price-card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .price {
+            font-size: 2rem;
+            color: var(--primary);
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .location { color: var(--gray); margin-bottom: 20px; }
+
+        .seller-info {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .seller-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #ddd;
+            margin-right: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: #666;
+        }
+
+        .seller-name { font-weight: bold; display: block; }
+        .seller-rating { color: gold; font-size: 0.8rem; }
+
+        /* Butonlar */
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 30px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 10px;
+            transition: 0.3s;
+            font-size: 1rem;
+        }
+
+        .btn-phone {
+            background-color: var(--secondary);
+            color: white;
+        }
+        .btn-phone:hover { background-color: #1a5bce; }
+
+        .btn-message {
+            background-color: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+        .btn-message:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .container { flex-direction: column; }
+            .main-image { height: 300px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo"><a href="index.html" style="text-decoration:none; color:white;">SawyerS</a> ...
+        <div>
+            <i class="fas fa-user-circle fa-lg"></i>
+        </div>
+    </header>
+
+    <div class="container">
+        
+        <div class="left-column">
+            <div class="breadcrumb">Anasayfa > Vasıta > Otomobil > Honda > Civic</div>
+            <h1 class="listing-title">Sahibinden Hatasız Boyasız 2020 Model Civic - Aile Aracı</h1>
+
+            <div class="gallery-card">
+                <img id="mainImg" src="https://images.unsplash.com/photo-1617788138017-80ad40651399?w=800&q=80" class="main-image">
+                <div class="thumbnails">
+                    <img src="https://images.unsplash.com/photo-1617788138017-80ad40651399?w=150" class="thumb active" onclick="changeImage(this)">
+                    <img src="https://images.unsplash.com/photo-1593054170366-5d6c8b02c011?w=150" class="thumb" onclick="changeImage(this)">
+                    <img src="https://images.unsplash.com/photo-1549399542-7e3f8b79c341?w=150" class="thumb" onclick="changeImage(this)">
+                    <img src="https://images.unsplash.com/photo-1542362567-b07e54358753?w=150" class="thumb" onclick="changeImage(this)">
+                </div>
+            </div>
+
+            <div class="details-section">
+                <h3>İlan Detayları</h3>
+                <table class="info-table">
+                    <tr><td>İlan No</td><td>#1053921</td></tr>
+                    <tr><td>İlan Tarihi</td><td>05 Ocak 2026</td></tr>
+                    <tr><td>Marka</td><td>Honda</td></tr>
+                    <tr><td>Model</td><td>Civic 1.6 i-VTEC Eco Elegance</td></tr>
+                    <tr><td>Yıl</td><td>2020</td></tr>
+                    <tr><td>Kilometre</td><td>45.000 KM</td></tr>
+                    <tr><td>Vites</td><td>Otomatik</td></tr>
+                    <tr><td>Yakıt</td><td>Benzin & LPG</td></tr>
+                    <tr><td>Durumu</td><td>İkinci El</td></tr>
+                </table>
+            </div>
+
+            <div class="details-section">
+                <h3>Açıklama</h3>
+                <div class="description-text">
+                    <p>Aracım 2020 model olup ilk sahibinden satılıktır. İçerisinde sigara içilmemiştir. Tüm bakımları yetkili serviste yapılmıştır. Garantisi devam etmektedir.</p>
+                    <br>
+                    <p><strong>Özellikler:</strong> Sunroof, koltuk ısıtma, geri görüş kamerası, hayalet ekran mevcuttur. Yedek anahtarı ve kitapçıkları alıcıya teslim edilecektir. Takas düşünmüyorum, sadece nakit satılık.</p>
+                    <br>
+                    <p>Alıcısına şimdiden hayırlı olsun.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="right-column">
+            <div class="sticky-sidebar">
+                <div class="price-card">
+                    <div class="price">950.000 TL</div>
+                    <div class="location"><i class="fas fa-map-marker-alt"></i> Ankara / Çankaya</div>
+                    
+                    <div class="seller-info">
+                        <div class="seller-avatar"><i class="fas fa-user"></i></div>
+                        <div>
+                            <span class="seller-name">Ahmet Yılmaz</span>
+                            <div class="seller-rating">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-phone" onclick="showPhone(this)">
+                        <i class="fas fa-phone"></i> 0532 *** ** ** (Göster)
+                    </button>
+                    
+                    <button class="btn btn-message" onclick="window.location.href='mesajlar.html'">
+    <i class="fas fa-comment-alt"></i> Mesaj Gönder
+</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Resim Değiştirme Fonksiyonu
+        function changeImage(element) {
+            // Ana resmi değiştir
+            document.getElementById('mainImg').src = element.src.replace('w=150', 'w=800');
+            
+            // Aktif sınıfını güncelle
+            document.querySelectorAll('.thumb').forEach(thumb => thumb.classList.remove('active'));
+            element.classList.add('active');
+        }
+
+        // Numara Gösterme Fonksiyonu
+        function showPhone(btn) {
+            btn.innerHTML = '<i class="fas fa-phone"></i> 0532 123 45 67';
+            btn.style.backgroundColor = '#2ecc71'; // Yeşil renk yap
+        }
+    </script>
+</body>
+</html>
