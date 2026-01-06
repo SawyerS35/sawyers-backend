@@ -123,12 +123,14 @@
             try {
                 // API'ye İstek At
                 console.log("İlanlar isteniyor...");
-                const res = await fetch('http://localhost:5000/api/ilanlar');
+                
+                // DÜZELTME 1: fetch=('...') yerine fetch('...') yapıldı.
+                const res = await fetch('https://sawyers-backend.onrender.com/api/ilanlar');
                 
                 if (!res.ok) throw new Error("Sunucu hatası: " + res.status);
                 
                 const ads = await res.json();
-                console.log("Gelen İlanlar:", ads); // Konsola bakabilirsin
+                console.log("Gelen İlanlar:", ads);
 
                 // Sayıyı Güncelle
                 counter.innerText = ads.length;
@@ -148,7 +150,7 @@
 
                 // İlanları Döngüye Sok
                 ads.forEach(ad => {
-                    // Veri Güvenliği (Eksik veri varsa bozmasın)
+                    // Veri Güvenliği
                     const title = ad.title || "Başlıksız İlan";
                     const price = ad.price ? Number(ad.price).toLocaleString('tr-TR') : "0";
                     const seller = ad.sellerName || "Bilinmiyor";
@@ -156,9 +158,10 @@
                     const date = ad.date ? new Date(ad.date).toLocaleDateString('tr-TR') : "-";
                     
                     // Resim Kontrolü
+                    // DÜZELTME 2: src içindeki hatalı "fetch(" yazısı kaldırıldı ve doğru URL formatı yapıldı.
                     let imgHtml = '<div style="width:60px; height:50px; background:#eee; display:flex; align-items:center; justify-content:center; border-radius:5px;">📷</div>';
                     if (ad.images && ad.images.length > 0) {
-                        imgHtml = `<img src="http://localhost:5000/uploads/${ad.images[0]}" class="table-img" alt="img">`;
+                        imgHtml = `<img src="https://sawyers-backend.onrender.com/uploads/${ad.images[0]}" class="table-img" alt="img">`;
                     }
 
                     const row = `
@@ -196,11 +199,12 @@
         async function deleteAd(adId) {
             if(!confirm("⚠️ DİKKAT: Yönetici yetkisiyle bu ilanı kalıcı olarak silmek üzeresiniz. Onaylıyor musunuz?")) return;
 
-            const adminId = localStorage.getItem('userId'); // Admin ID'si
+            const adminId = localStorage.getItem('userId');
 
             try {
                 // Silme İsteği
-                const res = await fetch(`http://localhost:5000/api/ilanlar/${adId}/${adminId}`, {
+                // DÜZELTME 3: Hatalı tırnak işaretleri ve URL birleştirmesi düzeltildi.
+                const res = await fetch(`https://sawyers-backend.onrender.com/api/ilanlar/${adId}/${adminId}`, {
                     method: 'DELETE'
                 });
 

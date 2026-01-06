@@ -205,7 +205,7 @@
 
             try {
                 // 2. Verileri Çek
-                const response = await fetch('http://localhost:5000/api/ilanlar');
+                const response = await fetch('https://sawyers-backend.onrender.com/api/ilanlar');
                 if (!response.ok) throw new Error(`Sunucu Hatası: ${response.status}`);
 
                 const ilanlar = await response.json();

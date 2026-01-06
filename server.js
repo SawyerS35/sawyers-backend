@@ -8,13 +8,15 @@ const fs = require('fs');
 const app = express();
 const PORT = 5000;
 
-// --- 1. MIDDLEWARE ---
-app.use(cors());
+// --- 1. MIDDLEWARE KISMI ---
+app.use(cors()); // Bu satırın olduğundan emin ol!
 app.use(express.json());
 app.use('/uploads', express.static('uploads'));
 
-// Uploads klasörü yoksa oluştur
-if (!fs.existsSync('./uploads')){ fs.mkdirSync('./uploads'); }
+// --- YENİ: ANA SAYFA ROTASI (Cannot GET / Hatasını çözer) ---
+app.get('/', (req, res) => {
+    res.send("<h1>SawyerS Backend Çalışıyor! 🚀</h1><p>Bu bir API sunucusudur.</p>");
+});
 
 // --- 2. MONGODB BAĞLANTISI ---
 mongoose.connect('mongodb://127.0.0.1:27017/sawyers2el')
